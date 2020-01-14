@@ -1,0 +1,1412 @@
+swagger: "2.0"
+info:
+  description: "This is a sample Twitter server API documentation."
+  version: "1.0.0"
+  title: "Swagger Twitter"
+host: "twitter.swagger.io"
+basePath: "/v1"
+tags:
+  - name: "user"
+    description: "APIs related to user"
+  - name: "tweet"
+    description: "APIs related to tweet"
+  - name: "list"
+    description: "APIs related to list"
+  - name: "message"
+    description: "APIs related to message"
+schemes:
+  - "http"
+securityDefinitions:
+  Bearer:
+    description: Example value:- Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5MmQwMGJhNTJjYjJjM
+    type: apiKey
+    name: Authorization
+    in: header
+paths:
+  /users/signup:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: Create user API
+      operationId: signup
+      produces:
+        - application/json
+      parameters:
+        - name: User details
+          in: body
+          required: true
+          description: "User details"
+          schema:
+            $ref: "#/definitions/Signup"
+      responses:
+        "200":
+          description: User successfully created
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: "5dc8c90c37baa550a0e09231"
+              name:
+                type: string
+                example: "This is my name"
+              email:
+                type: string
+                example: "user@gmail.com"
+              dateOfBirth:
+                type: string
+                example: "January 1 1990"
+              userName:
+                type: string
+                example: "Thisifd02b7a0-0"
+              isActive:
+                type: boolean
+                example: true
+        "400":
+          description: Bad request
+        "409":
+          description: User already exists
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal server error
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: Authenticate user
+      description: Authenticate user API
+      operationId: login
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: User's crecredentials
+          required: true
+          schema:
+            type: object
+            required:
+              - loginId
+              - password
+            properties:
+              loginId:
+                type: string
+                description: "User email id or phone number"
+                example: "9876543210"
+              password:
+                type: string
+                format: password
+                example: "Test@1234"
+      responses:
+        "200":
+          description: Auth successful
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: "5dc8c90c37baa550a0e09231"
+              name:
+                type: string
+                example: "This is my name"
+              email:
+                type: string
+                example: "user@gmail.com"
+              dateOfBirth:
+                type: string
+                example: "January 1 1990"
+              userName:
+                type: string
+                example: "Thisifd02b7a0-0"
+              isActive:
+                type: boolean
+                example: true
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkYzhjOTBjMzdiYWE1NTBhMGUwOTIzOCIsImlhdCI6MTU3MzQ0MDUyN30.BgKMUknT6AAV3FmRv10wI4z9Jj9doWp8Db1EWVXcwBT"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+  /users/profile/{userId}:
+    get:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Get user profile
+      description: Get User Profile Details
+      operationId: getUserProfile
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+          description: "User id"
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: "#/definitions/Profile"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Update user profile
+      description: Update User Profile Details
+      operationId: updateUserProfile
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+          description: "User id"
+        - name: User details
+          in: body
+          required: true
+          description: "User details"
+          schema:
+            $ref: "#/definitions/updateProfile"
+      responses:
+        "201":
+          description: Created Successfully
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Delete user account
+      description: Delete User Account & Its Related Details
+      operationId: deleteUserAccount
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+          description: "User id"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+  /users/deactivateAccount/{userId}:
+    delete:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Deactivate user account
+      description: Deactivate User Account
+      operationId: deactivateUserAccount
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+          description: "User id"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+  /tweets/createTweet:
+    post:
+      tags:
+        - tweet
+      security:
+        - Bearer: []
+      summary:
+        Create a new tweet which has text and/or images. Also create a retweet
+        of already created tweet
+      operationId: createTweet
+      parameters:
+        - name: Create Tweet
+          in: body
+          required: true
+          description: "Tweet details"
+          schema:
+            type: object
+            properties:
+              userId:
+                type: string
+                format: "ObjectId"
+                description: "Required always. This is the id of the user who is posting new tweet or retweeting"
+              tweetId:
+                type: string
+                format: "ObjectId"
+                description: "Tweet id of the tweet which user is trying to retweet. Required when retweeting."
+              userName:
+                type: string
+                description: "Required always. This is the username of the user who is posting new tweet or retweeting"
+              userImageURL:
+                type: string
+                description: "Required always. This is the profile image url of the user who is posting new tweet or retweeting"
+              imageURL:
+                type: string
+                description: "Optional. This is the URL of the image uploaded by the user along with the tweet"
+              isRetweet:
+                type: boolean
+                description: "Required when user is retweeting. This field indicates that the user is retweeting a tweet"
+              originalBody:
+                type: string
+                description: "Required when user is posting new tweet. This is field contains body of the tweet which the user is tweeting"
+      responses:
+        200:
+          description: Tweet/Retweet created
+        401:
+          description: Invalid input
+        404:
+          description: Database not found
+        501:
+          description: Server not responding
+  /tweets/addComment:
+    post:
+      tags:
+        - tweet
+      security:
+        - Bearer: []
+      summary: Add comment to a tweet
+      description: Adds a comment to TweetId along with current time.
+      operationId: addComment
+      parameters:
+        - name: comment
+          in: body
+          schema:
+            type: object
+            properties:
+              tweetId:
+                type: string
+                format: ObjectId
+              userId:
+                type: string
+                format: ObjectId
+              userName:
+                type: string
+              imageURL:
+                type: string
+              body:
+                type: string
+      responses:
+        200:
+          description: Comment added successfully
+        404:
+          description: Delete comment not successful due to unavailable resources
+        500:
+          description: Internal server error
+  /tweets/{tweetId}:
+    delete:
+      tags:
+        - tweet
+      security:
+        - Bearer: []
+      summary: Delete a tweet
+      operationId: deleteTweet
+      parameters:
+        - name: tweetId
+          in: path
+          description: TweetId of the tweet which should be deleted
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        200:
+          description: Tweet deleted successfully
+        404:
+          description: Delete comment not successful due to unavailable resources
+        500:
+          description: Internal server error
+  /users/bookmarkTweet:
+    post:
+      tags:
+        - user
+        - tweet
+      security:
+        - Bearer: []
+      summary: Add tweet to bookmark list of the user
+      description: Append TweetId to the list of tweets the user bookmarked.
+      operationId: bookmarkTweet
+      parameters:
+        - name: bookmarkTweet
+          in: body
+          required: true
+          description: "Tweet id and user id"
+          schema:
+            type: object
+            properties:
+              userId:
+                type: string
+                format: "ObjectId"
+              tweetId:
+                type: string
+                format: "ObjectId"
+      responses:
+        200:
+          description: Bookmark added successfully
+        404:
+          description: Bookmark not successful due to unavailable resources
+        500:
+          description: Internal server error
+  /tweet/topTweets/:
+    get:
+      tags:
+        - "tweet"
+      security:
+        - Bearer: []
+      summary: "Get top tweets on a day"
+      description: "This is for displaying top 10 tweets of the day"
+      operationId: "getTopTweets"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+        422:
+          description: "Invalid date supplied"
+  
+    post:
+      tags:
+        - "user"
+      security:
+        - Bearer: []
+      summary: "Remove a user to your following list"
+      description: "You will un-follow this user and get his tweets"
+      operationId: "unFollowUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "userid of user and the one you want to un-follow"
+          required: true
+          schema:
+            $ref: "#/definitions/Follow"
+      responses:
+        200:
+          description: "Successful operation"
+        404:
+          description: "Userid not found"
+  /user/followersOfUserId/{userId} :
+    get :
+      tags :
+      - "user"
+      security:
+      - Bearer: []
+      summary : "Get follower of an user"
+      description : "This gets the userid of the folowers for given userid"
+      operationId : "getFollowers"
+      produces : 
+      - "application/json"
+      parameters :
+      - name : "userId"
+        in : "path"
+        description : "userid you want followers of"
+        required : true
+        type : "string"
+      responses :
+        200 :
+          description : "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              count:
+                type: "number"
+              rows:
+                type: "array"
+                items:
+                  $ref: "#/definitions/followersOfUserId"
+        400 : 
+          description : "Bad request"
+        401 : 
+          description : "Unauthorized"
+        500 : 
+          description : "Internal server error"
+  /user/followedByUserId/{userId} :
+    get :
+      tags :
+      - "user"
+      security:
+      - Bearer: []
+      summary : "Get the list followed by a given user"
+      description : "This gets the userid of the accounts the userid is following"
+      operationId : "getFollowing"
+      produces : 
+      - "application/json"
+      parameters :
+      - name : "userId"
+        in : "path"
+        description : "userid you want to get the following list of"
+        required : true
+        type : "string"
+      responses :
+        200 :
+          description : "Successful operation"
+          schema:
+            type: "object"
+            properties:
+              count:
+                type: "number"
+              rows:
+                type: "array"
+                items:
+                  $ref: "#/definitions/followersOfUserId"
+        400 : 
+          description : "Bad request"
+        401 : 
+          description : "Unauthorized"
+        500 : 
+          description : "Internal server error"
+  /user/follow :
+    post :
+      tags :
+      - "user"
+      security:
+      - Bearer: []
+      summary : "Follow a user"
+      description : "You will follow this user and get his tweets"
+      operationId : "followUser"
+      produces : 
+      - "application/json"
+      parameters :
+      - name : "body"
+        in : "body"
+        description : "userid of user and the one you want to follow"
+        required : true
+        schema:
+          $ref: "#/definitions/Follow"
+      responses :
+        200 :
+          description : "Successful operation"
+        400 : 
+          description : "Bad request"
+        401 : 
+          description : "Unauthorized"
+        500 :
+          description : "Internal server error"
+  /user/unFollow :
+    post :
+      tags :
+      - "user"
+      security:
+      - Bearer: []
+      summary : "Un-Follow a user"
+      description : "You will un-follow this user and get his tweets"
+      operationId : "unFollowUser"
+      produces : 
+      - "application/json"
+      parameters :
+      - name : "body"
+        in : "body"
+        description : "userid of user and the one you want to un-follow"
+        required : true
+        schema:
+          $ref: "#/definitions/UnFollow"
+      responses :
+        200 :
+          description : "Successful operation"
+        400 : 
+          description : "Bad request"
+        401 : 
+          description : "Unauthorized"
+        500 :
+          description : "Internal server error"
+  /fetchTweetByID/{TweetID} :
+    get:
+      tags:
+        - "Search"
+      security:
+        - Bearer: []
+      summary: "Fetch tweet using tweet ID"
+      description: "Tweet ID is supplied and the tweet is returned"
+      operationId: "fetchTweetByID"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "tweetId"
+          in: "path"
+          description: "Id of the tweet to be fetched"
+          required: true
+          type: "number"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /fetchTweetByUserID/{UserID}:
+    get:
+      tags:
+        - "Search"
+      summary: "Fetch tweets based on UserID we can use this approach to implement fetching scenarios likeUser feed, subscriber feed, my tweets, my retweets, liked tweets and  bookmarked tweets"
+      description: "To get all the tweets that were tweeted out by the user bearing the given UserID"
+      operationId: "fetchTweetsByUserID"
+      produces:
+        - "application/json"
+      parameters:
+      - name: "UserID"
+        in: "path"
+        description: "UserID to filter tweets by"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid tag value"
+  /search/tweet/hashtag/{hashtag}:
+    get:
+      tags:
+        - "Search"
+      security:
+        - Bearer: []
+      summary: "Fetch tweets/topics based on Hashtags"
+      description: "To get all the tweets that contain the usgae of the searched hashtag"
+      operationId: "fetchTopicsByHashtag"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "hashtag"
+          in: "path"
+          description: "Search and fetch tweets using this hashtag"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/tweet"
+        400:
+          description: "Invalid tag value"
+  /fetchProfile/{UserID}:
+    get:
+      tags:
+        - "Search"
+      security:
+        - Bearer: []
+      summary: "Fetch User Profile based on UserID"
+      description: "To get the Profile details of the user bearing the given UserID"
+      operationId: "fetchProfile"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "UserID"
+          in: "path"
+          description: "UserID to fetch profile by"
+          required: true
+          type: "number"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid tag value"
+  /lists/list:
+    post:
+      tags:
+      - "list"
+      security:
+      - Bearer: []
+      summary: "Create a new list with users who belong to the list"
+      description: ""
+      operationId: "createList"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Name of the list along with owner ID and user IDs of users who belong to the list"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateList"
+      responses:
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        409:
+          description: "List name already exists for this user"
+        422:
+          description: "User cannot be a member in his own list"
+        201:
+          description : "List created successfully"
+          schema:
+            $ref: "#/definitions/CreateListResponse"
+        500:
+          description: "Internal Server Error"
+  /lists/all/{userId}:
+    get:
+      tags:
+      - "list"
+      security:
+      - Bearer: []
+      summary: "Get all the lists created by user"
+      description: ""
+      operationId: "getAllList"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "userId"
+        type: "string"
+        description: ""
+        required: true
+      responses:
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        200:
+          description : "OK"
+          schema:
+            $ref: "#/definitions/GetListResponse"
+        204:
+          description : "No lists found"
+        500:
+          description: "Internal Server Error"
+  /lists/owned/{userId}:
+    get:
+      tags:
+      - "list"
+      security:
+      - Bearer: []
+      summary: "Get all the lists created by user"
+      description: ""
+      operationId: "getOwnedList"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "userId"
+        type: "string"
+        description: ""
+        required: true
+      responses:
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        200:
+          description : "OK"
+          schema:
+            $ref: "#/definitions/GetListResponse"
+        204:
+          description : "No lists found"
+        500:
+          description: "Internal Server Error"
+  /lists/subscribed/{userId}:
+    get:
+      tags:
+      - "list"
+      security:
+      - Bearer: []
+      summary: "Fetch all lists which are subscribed by a user"
+      description: ""
+      operationId: "fetchUserSubscribedLists"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "userId"
+        type: "string"
+        description: ""
+        required: true
+      responses:
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        200:
+          description : "OK"
+          schema:
+            $ref: "#/definitions/SubscribedListResponse"
+        204:
+          description : "No lists found"
+        500:
+          description: "Internal Server Error"
+  /lists/subscribe:
+    post:
+      tags:
+      - "list"
+      security:
+      - Bearer: []
+      summary: "Subscribe a user to a list of another user's list"
+      description: "User will subscribe to a list created by others"
+      operationId: "subscribeList"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/SubscribeList"
+      responses:
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        409:
+          description: "User cannot subscribe to his own list / User is already subscribed to this list"
+        201:
+          description : "List subscribed successfully"
+          schema:
+            $ref: "#/definitions/SubscribeListResponse"
+        500:
+          description: "Internal Server Error"
+  /user/message/send:
+    post:
+      tags:
+        - "message"
+      security:
+        - Bearer: []
+      summary: "User sends a message to another user"
+      description: "User 1 sends message to user 2"
+      operationId: "sendMessage"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/SendMessage"
+      responses:
+        "200":
+          description: "message sent successfully"
+        '400':
+          description: "Invalid from fromUserID or toUserID"
+        '422':
+          description: Unprocessable Entity
+        '500':
+          description: Internal server error
+  /user/message/inbox:
+    get:
+      tags:
+        - "message"
+      security:
+        - Bearer: []
+      summary: "Fetch people in inbox for a user"
+      description: "Returns list of users who are present in inbox of requesting user"
+      operationId: "getUsersInInbox"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+      - in: "body"
+        name: "query"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/UserInbox"
+        "400":
+          description: "Invalid userID"
+        '422':
+          description: Unprocessable Entity
+        '500':
+          description: Internal server error
+  /user/message/conversation:
+    get:
+      tags:
+        - "message"
+      security:
+        - Bearer: []
+      summary: "get messages belonging to a particular conversation"
+      description: ""
+      operationId: "fetchConverstationMessages"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+      - in: "body"
+        name: "query"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/ConversationUsers"
+      responses:
+        "200":
+          description: "All messages belonging to a conversation"
+          schema:
+            $ref: "#/definitions/ConversationMessages"
+        "400":
+          description: "Invalid userID"
+        '409': 
+          description: User already exists
+        '422':
+          description: Unprocessable Entity
+        '500':
+          description: Internal server error
+  /user/likeTweet:
+    post:
+      tags:
+        - tweet
+      security:
+        - Bearer: []
+      summary: Users can like a tweet posted by another user.
+      description:
+        When user likes a tweet, store tweetid and userid in like table
+        and increase the count of likes for the tweet.
+      operationId: likeTweet
+      parameters:
+        - name: tweetid
+          in: query
+          description: TweetID of the tweet that needs to be liked
+          required: true
+          type: "string"
+          format: "ObjectId"
+        - name: userid
+          in: query
+          description: UserID/Username of the user that liked the tweet
+          required: true
+          type: "string"
+          format: "ObjectId"
+      responses:
+        200:
+          description: Like Tweet Successful
+        204:
+          description: Tweet not found
+        400:
+          description: User already liked the tweet
+        401:
+          description: Unauthorized
+        404:
+          description: Like Tweet not successful due to unavailable resources
+        500:
+          description: Internal server error
+  /tweets/searchByHashTag:
+    post:
+      tags:
+        - tweet
+      security:
+        - Bearer: []
+      summary: Search tweets by hashtag
+      description: when a word of string is entered in search with '#' this is triggered from UI
+      operationId: searchByUserName
+      parameters:
+        - name: keyword
+          in: body
+          description: search string
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: search tweets by hash-tag successful
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server error
+  /user/searchByUserName:
+    post:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Search users by user name
+      description: when a word of string is entered in search with '@' this is triggered from UI
+      operationId: searchByUserName
+      parameters:
+        - name: keyword
+          in: body
+          description: search string
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: search user by user-name successful
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server error
+  /user/searchByName:
+    post:
+      tags:
+        - user
+      security:
+        - Bearer: []
+      summary: Search users by profile name
+      description: when a word of string is entered in search without '#'' or '@' this is triggered
+      operationId: searchByName
+      parameters:
+        - name: keyword
+          in: body
+          description: search string
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: search user by name successful
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server error
+  /users/logout:
+    put:
+      tags:
+        - "user"
+      security:
+        - Bearer: []
+      summary: "Logout user"
+      description: "Logout user and delete that token from database"
+      operationId: "logout"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful logout"
+        400:
+          description: "Bad request"
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server error"
+definitions:
+  Follow :
+    type : "object"
+    properties : 
+      userId :
+        type : "string"
+      followerId :
+        type : "string"
+  UnFollow :
+    type : "object"
+    properties : 
+      userId :
+        type : "string"
+      followerId :
+        type : "string"
+  followersOfUserId:
+    type : "object"
+    properties:
+      id:
+        type: "integer"
+      userId:
+        type: "string"
+        format: "ObjectId"
+      followerId:
+        type: "string"
+        format: "mongo id"
+      createdAt:
+        type: "string"
+        format: "Date time"
+      updatedAt:
+        type: "string"
+        format: "Date time"
+  User:
+    type: "object"
+    properties:
+      userID:
+        type: "string"
+        format: "ObjectId"
+  GetListResponse:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        _id:
+          type: "string"
+          format: "ObjectId"
+        ownerId:
+          type: "string"
+          format: "ObjectId"
+        ownerName:
+          type: "string"
+        listName:
+          type: "string"
+        noOfSubscribers:
+          type: "number"
+        noOfMembers:
+          type: "number"
+        membersId:
+          type: "array"
+          items: 
+            type: "object"
+            description: "Array of userIds(members)"
+            properties:
+              _id:
+                type: "string"
+                format: "ObjectId"
+              memberId:
+                type: "string"
+                format: "ObjectId"
+              memberName:
+                type: "string"
+              memberImageURL:
+                type: "string"
+  CreateList:
+    type: "object"
+    properties:
+      ownerId:
+        type: "string"
+        format: "ObjectId"
+      listName:
+        type: "string"
+      membersId:
+        type: "array"
+        items: 
+          type: "object"
+          format: "ObjectId"
+          description: "Array of userIds(members)"
+          properties:
+            memberId:
+              type: "string"
+              format: "ObjectId"
+            memberName:
+              type: "string"
+            memberImageURL:
+              type: "string"
+        uniqueItems: true
+  CreateListResponse:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+        format: "ObjectId"
+      ownerId:
+        type: "string"
+        format: "ObjectId"
+      ownerName:
+        type: "string"
+      listName:
+        type: "string"
+      noOfSubscribers:
+        type: "number"
+      noOfMembers:
+        type: "number"
+      membersId:
+        type: "array"
+        items: 
+          type: "object"
+          format: "ObjectId"
+          description: "Array of userIds(members)"
+          properties:
+            _id:
+              type: "string"
+              format: "ObjectId"
+            memberId:
+              type: "string"
+              format: "ObjectId"
+            memberName:
+              type: "string"
+            memberImageURL:
+              type: "string"
+  SubscribeList:
+    type: "object"
+    properties:
+      subscriberId:
+        type: "string"
+        format: "ObjectId"
+      subscriberName:
+        type: "string"
+      listId:
+        type: "string"
+        format: "ObjectId"
+      listName:
+        type: "string"
+  SubscribeListResponse:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      subscriberId:
+        type: "string"
+        format: "ObjectId"
+      subscriberName:
+        type: "string"
+      listId:
+        type: "string"
+        format: "ObjectId"
+      listName:
+        type: "string"
+      updatedAt:
+        type: "string"
+      createdAt:
+        type: "string"
+  SubscribedListResponse:
+    type: "array"
+    items:
+      type: "object"
+      properties:
+        id:
+          type: "number"
+        subscriberId:
+          type: "string"
+          format: "ObjectId"
+        subscriberName:
+          type: "string"
+        listId:
+          type: "string"
+          format: "ObjectId"
+        listName:
+          type: "string"
+        updatedAt:
+          type: "string"
+        createdAt:
+          type: "string"
+  SendMessage:
+    type: "object"
+    properties:
+      fromUserID:
+        type: "string"
+        format: "ObjectId"
+      toUserID:
+        type: "string"
+        format: "ObjectId"
+      message:
+        type: "string"
+      time:
+        type: "string"
+        format: "date-time"
+  UserInbox:
+    type: "object"
+    properties:
+      userDetails:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            userID:
+              type: "string"
+              format: "ObjectId"
+            userName:
+              type: "string"
+  ConversationUsers:
+    type: "object"
+    properties:
+      fromUserID:
+        type: "string"
+        format: "ObjectId"
+      toUserID:
+        type: "string"
+        format: "ObjectId"
+  ConversationMessages:
+    type: "object"
+    properties:
+      messages:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            senderUserID:
+              type: "string"
+              format: "ObjectId"
+            text:
+              type: "string"
+            time:
+              type: "string"
+              format: "date-time"
+  Signup:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Name of the user. Username will be generated automatically in the backend"
+        example: "Username"
+      email:
+        type: "string"
+        description: "Email of the user. This is optional. User will provide either phone number or email during login"
+        example: "user@gmail.com"
+      phone:
+        type: "number"
+        description: "Phone number of the user. This is optional. User will provide either phone number or email during login"
+        example: "9876543210"
+      password:
+        type: "string"
+        description: "Password for user account. It must contain atleast one uppercase letter, one lower case letter, one number and one special character"
+        example: "Test@1234"
+      dateOfBirth:
+        type: "string"
+        description: "Should be of the format Month DD YYYY"
+        example: "January 1 1990"
+  Profile:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+        format: "ObjectId"
+      name:
+        type: "string"
+      userName:
+        type: "string"
+      city:
+        type: "string"
+      state:
+        type: "string"
+      zipcode:
+        type: "string"
+      imageURL:
+        type: "string"
+      description:
+        type: "string"
+      isActive:
+        type: boolean
+      bookmarks:
+        type: "array"
+        items:
+          type: string
+          description: "Tweet IDs of bookedmarked tweet"
+      views:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            date:
+              type: "string"
+              example: "01/31/1990"
+            count:
+              type: number
+      phone:
+        type: number
+        example: "9876543210"
+      email:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+  updateProfile:
+    type: "object"
+    properties:
+      _id:
+        type: "string"
+        format: "ObjectId"
+      name:
+        type: "string"
+      userName:
+        type: "string"
+      city:
+        type: "string"
+      state:
+        type: "string"
+      zipcode:
+        type: "string"
+      imageURL:
+        type: "string"
+      description:
+        type: "string"
+      phone:
+        type: number
+        example: "9876543210"
+      email:
+        type: "string"
+  tweet:
+    type: "object"
+    properties:
+      _id:
+        type: string
+        format: "ObjectId"
+      userId:
+        type: string
+        format: "ObjectId"
+      userName:
+        type: string
+      userImageURL:
+        type: string
+      tweetDate:
+        type: string
+      imageURL:
+        type: string
+      isRetweet:
+        type: boolean
+      originalTweetId:
+        type: string
+        format: "ObjectId"
+      originalUserId:
+        type: string
+        format: "ObjectId"
+      originalUserName:
+        type: string
+      originalUserImageURL:
+        type: string
+      originalBody:
+        type: string
+      likeCount:
+        type: number
+      commentCount:
+        type: number
+      retweetCount:
+        type: number
+      views:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            date:
+              type: "string"
+              example: "01/31/1990"
+            count:
+              type: number
+      comments:
+        type: "array"
+        items:
+          type: object
+          properties:
+            userId:
+              type: string
+              format: "ObjectId"
+            userName:
+              type: string
+            imageURL:
+              type: string
+            time:
+              type: string
+            body:
+              type: string
